@@ -1,8 +1,8 @@
 import inspect
 
 from ultralytics import YOLO
-from ultralytics.engine.model import Model
 from ultralytics.cfg import get_cfg
+from ultralytics.engine.model import Model
 from ultralytics.models.yolo import detect
 from ultralytics.models.yolo.detect.afss_train import AFSSDetectionTrainer
 

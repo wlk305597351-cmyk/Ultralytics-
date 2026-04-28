@@ -34,7 +34,9 @@ def test_obb_aggregate_image_metrics_counts_precision_and_recall():
 
 def test_obb_evaluator_collects_payload_by_image_file(tmp_path):
     evaluator = AFSSOBBEvaluator(save_dir=tmp_path)
-    evaluator.store_image_metrics("sample.jpg", aggregate_image_metrics(num_gt=4, num_pred=4, matched_gt=3, matched_pred=3))
+    evaluator.store_image_metrics(
+        "sample.jpg", aggregate_image_metrics(num_gt=4, num_pred=4, matched_gt=3, matched_pred=3)
+    )
 
     assert evaluator.image_results["sample.jpg"]["metrics"]["obb"]["recall"] == 0.75
     assert evaluator.image_results["sample.jpg"]["task_score"] == 0.75

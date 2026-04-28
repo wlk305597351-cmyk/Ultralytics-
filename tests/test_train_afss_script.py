@@ -1,7 +1,6 @@
 import ast
 from pathlib import Path
 
-
 SCRIPT_PATH = Path("train_afss.py")
 
 
