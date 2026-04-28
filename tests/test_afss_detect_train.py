@@ -113,7 +113,9 @@ def test_afss_trainer_resume_after_warmup_restores_last_active_list(tmp_path):
         return "resumed-afss-loader"
 
     trainer.get_dataloader = fake_get_dataloader
-    trainer._restore_afss_resume_state({"afss_resume": {"active_list_name": "train_epoch0020.txt", "active_list_epoch": 20}})
+    trainer._restore_afss_resume_state(
+        {"afss_resume": {"active_list_name": "train_epoch0020.txt", "active_list_epoch": 20}}
+    )
 
     assert trainer.train_loader == "resumed-afss-loader"
     assert calls == [(str(active_list), 4, -1, "train")]
@@ -130,7 +132,9 @@ def test_afss_trainer_resume_during_warmup_keeps_full_dataset_loader(tmp_path):
         return "resumed-afss-loader"
 
     trainer.get_dataloader = fake_get_dataloader
-    trainer._restore_afss_resume_state({"afss_resume": {"active_list_name": "train_epoch0020.txt", "active_list_epoch": 20}})
+    trainer._restore_afss_resume_state(
+        {"afss_resume": {"active_list_name": "train_epoch0020.txt", "active_list_epoch": 20}}
+    )
 
     assert trainer.train_loader == "original-loader"
     assert calls == []

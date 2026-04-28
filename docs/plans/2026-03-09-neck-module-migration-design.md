@@ -263,11 +263,11 @@ neck 改进 YAML 统一放到：
 3. `ultralytics/nn/extra_modules/__init__.py` 中 neck 分类导出
 4. `ultralytics/nn/tasks.py` 中 `<NeckName>` 对应解析逻辑
 5. 以下检测 YAML：
-   - `ultralytics/cfg/models/improve/neck/yolo11/yolo11-<NeckName>.yaml`
-   - `ultralytics/cfg/models/improve/neck/yolo12/yolo12-<NeckName>.yaml`
-   - `ultralytics/cfg/models/improve/neck/yolo26/yolo26-<NeckName>.yaml`
-   - `ultralytics/cfg/models/improve/neck/yolov8/yolov8-<NeckName>.yaml`
-   - `ultralytics/cfg/models/improve/neck/yolov10n/yolov10n-<NeckName>.yaml`
+    - `ultralytics/cfg/models/improve/neck/yolo11/yolo11-<NeckName>.yaml`
+    - `ultralytics/cfg/models/improve/neck/yolo12/yolo12-<NeckName>.yaml`
+    - `ultralytics/cfg/models/improve/neck/yolo26/yolo26-<NeckName>.yaml`
+    - `ultralytics/cfg/models/improve/neck/yolov8/yolov8-<NeckName>.yaml`
+    - `ultralytics/cfg/models/improve/neck/yolov10n/yolov10n-<NeckName>.yaml`
 
 `BiFPN` 与 `SDFM` 可作为该交付模板的首批示例实现。
 
@@ -276,17 +276,17 @@ neck 改进 YAML 统一放到：
 后续每一个 neck 模块迁移都按以下顺序验证：
 
 1. 导入验证
-   - 确认新模块能从 `ultralytics.nn.extra_modules` 正常导入
+    - 确认新模块能从 `ultralytics.nn.extra_modules` 正常导入
 2. `parse_model` 冒烟
-   - 确认新增 YAML 能被模型解析器成功加载
+    - 确认新增 YAML 能被模型解析器成功加载
 3. 家族覆盖检查
-   - `yolo11`、`yolo12`、`yolo26`、`yolov8`、`yolov10n` 五个家族必须全部补齐
-   - 不允许只迁 `yolo11` 而缺失其余家族文件
+    - `yolo11`、`yolo12`、`yolo26`、`yolov8`、`yolov10n` 五个家族必须全部补齐
+    - 不允许只迁 `yolo11` 而缺失其余家族文件
 4. YAML 快速验证
-   - 对每个新 YAML 单独做快速测试
-   - 记录参数量、GFLOPs、stride
+    - 对每个新 YAML 单独做快速测试
+    - 记录参数量、GFLOPs、stride
 5. 异常分流
-   - 若某个模型家族因基础结构差异导致无法直接适配，应明确记录原因，并决定修正或暂缓，而不是无说明跳过
+    - 若某个模型家族因基础结构差异导致无法直接适配，应明确记录原因，并决定修正或暂缓，而不是无说明跳过
 
 ## 11. 风险与规避
 
