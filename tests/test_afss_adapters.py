@@ -1,4 +1,4 @@
-from ultralytics.afss.adapters import DetectAdapter, OBBAdapter, SegmentAdapter, PoseAdapter
+from ultralytics.afss.adapters import DetectAdapter, OBBAdapter, PoseAdapter, SegmentAdapter
 
 
 def test_detect_adapter_uses_min_box_precision_recall():
