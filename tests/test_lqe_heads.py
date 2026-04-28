@@ -7,7 +7,6 @@ import torch
 from ultralytics import YOLO
 from ultralytics.nn.tasks import parse_model
 
-
 LQE_HEADS = {
     "Segment_LQE": {
         "args": (5, 8, 32, 16, False, (32, 64, 128)),
