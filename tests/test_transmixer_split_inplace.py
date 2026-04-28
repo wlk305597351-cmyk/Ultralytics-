@@ -6,7 +6,6 @@ from ultralytics.utils.torch_utils import initialize_weights
 
 def test_transmixer_backward_survives_global_inplace_activation_init():
     """TransMixer should remain trainable after Ultralytics flips activations to inplace mode."""
-
     model = TransMixerModule(32)
     initialize_weights(model)
 
