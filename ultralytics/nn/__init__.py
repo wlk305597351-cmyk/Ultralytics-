@@ -1,27 +1,27 @@
-# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license    
+# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 
-from .tasks import (  
+from .tasks import (
     BaseModel,
     ClassificationModel,
-    DetectionModel,  
+    DetectionModel,
     SegmentationModel,
     guess_model_scale,
     guess_model_task,
-    load_checkpoint,   
-    parse_model,     
-    torch_safe_load,    
-    yaml_model_load,  
+    load_checkpoint,
+    parse_model,
+    torch_safe_load,
+    yaml_model_load,
 )
-  
+
 __all__ = (
-    "BaseModel",     
+    "BaseModel",
     "ClassificationModel",
     "DetectionModel",
     "SegmentationModel",
     "guess_model_scale",
-    "guess_model_task", 
+    "guess_model_task",
     "load_checkpoint",
-    "parse_model",   
+    "parse_model",
     "torch_safe_load",
     "yaml_model_load",
-) 
+)
