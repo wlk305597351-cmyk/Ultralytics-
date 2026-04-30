@@ -1,0 +1,1 @@
+exp_name,timestamp,git_commit,model,cfg,data,epochs,batch,imgsz,gpu,status,best_mAP50,best_mAP50_95,log_path,wandb_url,notes

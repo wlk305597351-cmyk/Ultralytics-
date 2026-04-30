@@ -1,5 +1,8 @@
-import warnings, os, sys
-os.environ["CUDA_VISIBLE_DEVICES"] = '0' # 指定使用第0张显卡
+import warnings, os, sys, argparse, csv
+from pathlib import Path
+
+# 默认使用第 0 张显卡，运行时可通过 --device 覆盖
+os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 # os.environ["CUDA_VISIBLE_DEVICES"] = '2' # 指定使用第三张显卡
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 warnings.filterwarnings('ignore')
@@ -60,26 +63,75 @@ def print_highlight_table(table, header_color_value_cols=None, color_first_col=T
 
     print(highlighted)
 
-if __name__ == '__main__':
-    # 选择训练好的权重路径
-    model_path = '/home/wanglinkai/projects/Ultralytics_305597351/yolov8m.pt' # 直接使用官方预训练权重
-    # 设置用于计算指标的图像尺寸
-    imgsz = 640
 
-    model = YOLO(model_path) 
-    result = model.val(data='dataset/data.yaml',
-                        split='test', # split可以选择train、val、test 根据自己的数据集情况来选择.
-                        imgsz=imgsz,
-                        batch=16,
-                        batch=16,
-                        rect=False, # 验证时统一固定imgsz x imgsz 做 letterbox，避免一些改进在验证的时候会报尺寸问题
-                        auto_coco_eval=True, # 一步到位计算COCO指标
-                        # iou=0.7,
-                        # save_json=True,
+def _update_registry(name, mAP50, mAP50_95):
+    """更新 registry.csv 中对应实验的评估指标。"""
+    registry_path = Path(__file__).parent / 'experiments' / 'registry.csv'
+    if not registry_path.exists():
+        return
+
+    rows = []
+    with open(registry_path, 'r', newline='') as f:
+        reader = csv.DictReader(f)
+        fieldnames = reader.fieldnames
+        rows = list(reader)
+
+    # 找到最近一条 name 匹配且 status=started 的行，更新为 evaluated
+    updated = False
+    for row in reversed(rows):
+        if row.get('exp_name') == name and row.get('status') == 'started':
+            row['best_mAP50'] = f'{mAP50:.4f}'
+            row['best_mAP50_95'] = f'{mAP50_95:.4f}'
+            row['status'] = 'evaluated'
+            updated = True
+            break
+
+    if updated:
+        with open(registry_path, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='YOLO Snow 评估')
+    parser.add_argument('--model', type=str,
+                        default='/home/wanglinkai/projects/Ultralytics_305597351/yolov8m.pt',
+                        help='权重路径')
+    parser.add_argument('--data', type=str, default='dataset/data.yaml',
+                        help='数据集配置文件')
+    parser.add_argument('--device', type=str, default='0',
+                        help='GPU ID')
+    parser.add_argument('--batch', type=int, default=16,
+                        help='批次大小')
+    parser.add_argument('--imgsz', type=int, default=640,
+                        help='图像尺寸')
+    parser.add_argument('--split', type=str, default='test',
+                        choices=['train', 'val', 'test'],
+                        help='评估 split')
+    parser.add_argument('--name', type=str, default='yolov8m',
+                        help='实验名（用于回写 registry）')
+
+    args = parser.parse_args()
+
+    # --- GPU 控制 ---
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.device
+
+    # 选择训练好的权重路径
+    model_path = args.model
+    # 设置用于计算指标的图像尺寸
+    imgsz = args.imgsz
+
+    model = YOLO(model_path)
+    result = model.val(data=args.data,
+                        split=args.split,
+                        imgsz=args.imgsz,
+                        batch=args.batch,
+                        rect=False,
+                        auto_coco_eval=True,
                         project='val',
-                        name='yolov8m',
-                        device=os.environ.get("CUDA_VISIBLE_DEVICES", 0), # 训练设备选择，不在这里设置，在头部设置，详细可以看UserGuide.md中的常见问题第4点
-                        # end2end=False # 如果训练的是NMSFree类型的模型，不想用一对一的头可以设置False
+                        name=args.name,
+                        device='0',
                         )
     
     length = result.box.p.size
@@ -365,3 +417,12 @@ if __name__ == '__main__':
     
     for _ in range(5):
         LOGGER.info(f'{BOLD}{ORANGE}{"-"*20}结果已保存至 {result.save_dir}/paper_data.txt...{"-"*20}{RESET}')
+
+    # --- registry 回写 ---
+    try:
+        mAP50 = result.results_dict.get('metrics/mAP50(B)', None)
+        mAP50_95 = result.results_dict.get('metrics/mAP50-95(B)', None)
+        if mAP50 is not None and mAP50_95 is not None:
+            _update_registry(args.name, mAP50, mAP50_95)
+    except Exception:
+        pass  # registry 更新失败不阻塞

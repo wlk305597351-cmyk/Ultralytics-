@@ -78,8 +78,61 @@ scripts/
 | 领域 | Sub-agent | 状态 |
 |------|-----------|------|
 | 数据集检查（任何涉及 data.yaml、labels/、images/、标注质量、类别分布的审计） | `data-inspector` | 可用 |
-| 训练启动（train.py、超参调整、smoke test、正式训练） | `trainer` | 待建 |
-| 评估/验证（val.py、mAP 计算、结果分析） | `evaluator` | 待建 |
+| 训练启动（GPU 检测 → 参数确认 → 数据审计 → 冒烟测试 → detach 启动） | `trainer` | 可用 |
+| 训练进度查询（读取 results.csv、估算剩余时间、崩溃检测） | `monitor` | 可用 |
+| 评估/验证（val.py、mAP 计算、结果分析、实验对比） | `evaluator` | 可用 |
+
+## 训练自动化工作流
+
+### 触发方式
+
+用自然语言触发 agent，无需手动编辑脚本：
+
+| 你想做的事 | 可以这样说 |
+|-----------|-----------|
+| 启动训练 | "训练 yolov8s 100 epochs" / "用 yolov8m 训练，加 EMA 模块" |
+| 查询进度 | "看下 {实验名} 进度" / "现在跑得怎么样" |
+| 评估模型 | "评估 {实验名}" / "val 一下 {实验名}" |
+| 对比实验 | "比较一下 {实验A} 和 {实验B}" |
+
+### 实验注册表
+
+所有实验记录在 `experiments/registry.csv`：
+
+```
+exp_name, timestamp, git_commit, model, cfg, data, epochs, batch, imgsz, gpu,
+status, best_mAP50, best_mAP50_95, log_path, wandb_url, notes
+```
+
+- `status` 取值：`started` → `completed` / `crashed` / `evaluated` / `smoke_failed`
+- trainer 启动时写入 `started` 行，evaluator 完成后更新 mAP 字段
+- 训练日志在 `logs/{name}.log`，PID 文件在 `logs/{name}.pid`
+
+### train.py / val.py 参数
+
+`python train.py --help` 和 `python val.py --help` 列出完整参数。常用：
+
+```
+python train.py --model yolov8s.pt --device 1 --epochs 100 --batch 16 --name my_exp
+python train.py --model yolov8m.pt --cfg improve/attention/yolov8/yolov8-EMA-1.yaml --epochs 200
+python train.py --dry-run                          # 只打印参数，不训练
+python val.py --model train/my_exp/weights/best.pt --device 1 --name my_exp
+```
+
+### 多卡训练
+
+指定 `--device 0,1` 即可启动多卡：
+
+```
+python train.py --model yolov8l.pt --device 0,1 --batch 32
+```
+
+### 已知限制
+
+- **trainer agent 启动训练后不会主动汇报进度**。训练是 detach 模式运行的（nohup），关闭 Claude Code 会话不影响训练。需要查询进度时，主动说「看下 {实验名} 进度」触发 monitor agent
+- **单卡为主，不做自动 DDP 决策**。多卡仅在用户显式指定 `--device 0,1` 时启用
+- **wandb 暂未接入**。registry.csv 的 `wandb_url` 字段保留，将来接 wandb 时不需改 schema
+- **agent 只做编排，不提供调参建议**。超参数选择由用户决定
 
 ## 用户偏好
 
