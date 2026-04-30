@@ -1,5 +1,5 @@
 import warnings, os, sys
-os.environ["CUDA_VISIBLE_DEVICES"] = '4' # 指定使用第一张显卡
+os.environ["CUDA_VISIBLE_DEVICES"] = '0' # 指定使用第0张显卡
 # os.environ["CUDA_VISIBLE_DEVICES"] = '2' # 指定使用第三张显卡
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 warnings.filterwarnings('ignore')
@@ -70,6 +70,7 @@ if __name__ == '__main__':
     result = model.val(data='dataset/data.yaml',
                         split='test', # split可以选择train、val、test 根据自己的数据集情况来选择.
                         imgsz=imgsz,
+                        batch=16,
                         batch=16,
                         rect=False, # 验证时统一固定imgsz x imgsz 做 letterbox，避免一些改进在验证的时候会报尺寸问题
                         auto_coco_eval=True, # 一步到位计算COCO指标

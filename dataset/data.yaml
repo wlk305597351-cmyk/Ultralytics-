@@ -1,27 +1,14 @@
+# 本项目下的dataset中的数据集仅供大家参考存放格式和调试代码是否能跑通
+
 path: /home/wanglinkai/projects/Ultralytics_305597351/dataset
 train: images/train
 val: images/val
 test: images/test
 
-nc: 20
+nc: 5
 names:
-  0: 'aeroplane'
+  0: 'person'
   1: 'bicycle'
-  2: 'bird'
-  3: 'boat'
-  4: 'bottle'
-  5: 'bus'
-  6: 'car'
-  7: 'cat'
-  8: 'chair'
-  9: 'cow'
-  10: 'diningtable'
-  11: 'dog'
-  12: 'horse'
-  13: 'motorbike'
-  14: 'person'
-  15: 'pottedplant'
-  16: 'sheep'
-  17: 'sofa'
-  18: 'train'
-  19: 'tvmonitor'
+  2: 'car'
+  3: 'motorcycle'
+  4: 'bus'
