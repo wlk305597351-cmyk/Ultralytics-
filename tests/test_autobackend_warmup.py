@@ -25,7 +25,6 @@ class _FiniteInputModel(torch.nn.Module):
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA is required for warmup regression coverage")
 def test_autobackend_warmup_uses_finite_dummy_input(monkeypatch):
     """Warmup should use finite dummy inputs even if uninitialized allocations contain NaNs."""
-
     model = _FiniteInputModel().to("cuda")
 
     def fake_empty(*size, **kwargs):

@@ -1,9 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(nvidia-smi *)",
-      "Bash(conda env list)",
-      "mcp__ide__getDiagnostics"
-    ]
+    "allow": ["Bash(nvidia-smi *)", "Bash(conda env list)", "mcp__ide__getDiagnostics"]
   }
 }

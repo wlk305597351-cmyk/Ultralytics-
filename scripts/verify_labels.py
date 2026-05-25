@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""校验 5 类标签文件的正确性。
+"""校验 5 类标签文件的正确性。.
 
 校验项：
   - class_id ∈ [0, 4]
@@ -39,7 +39,7 @@ def check_labels(split_name):
 
     for fname in txt_files:
         fpath = os.path.join(label_dir, fname)
-        with open(fpath, "r") as f:
+        with open(fpath) as f:
             lines = f.readlines()
 
         if len(lines) == 0 or all(not l.strip() for l in lines):
@@ -68,7 +68,7 @@ def check_labels(split_name):
                 continue
 
             if cls_id < 0 or cls_id >= NC:
-                errors.append(f"[{split_name}] {fname}:{lno}  class_id={cls_id} 超出 [0,{NC-1}]: {line}")
+                errors.append(f"[{split_name}] {fname}:{lno}  class_id={cls_id} 超出 [0,{NC - 1}]: {line}")
                 file_errors += 1
 
             for val_name, val in [("cx", cx), ("cy", cy), ("w", w), ("h", h)]:
@@ -88,7 +88,7 @@ def check_labels(split_name):
 
 
 def check_pairing(split_name):
-    """双向配对检查：每个图片对应 .txt，每个 .txt 对应图片。"""
+    """双向配对检查：每个图片对应 .txt，每个 .txt 对应图片。."""
     img_dir = os.path.join(IMAGES_DIR, split_name)
     label_dir = os.path.join(LABELS_DIR, split_name)
 
@@ -130,7 +130,7 @@ def main():
     print("=" * 60)
     print("  5 类标签校验")
     print(f"  期望 class_id ∈ [0, {NC - 1}]")
-    print(f"  期望 cx/cy/w/h ∈ [0, 1]")
+    print("  期望 cx/cy/w/h ∈ [0, 1]")
     print("=" * 60)
 
     # ---- 标签内容校验 ----
@@ -157,9 +157,9 @@ def main():
         if len(errors) > 30:
             print(f"    ... 还有 {len(errors) - 30} 个")
     else:
-        print(f"  0 个错误，标签格式全部正确 ✅")
+        print("  0 个错误，标签格式全部正确 ✅")
 
-    print(f"\n--- 最终统计 ---")
+    print("\n--- 最终统计 ---")
     print(f"  总 box 数: {total_boxes_all}")
     print(f"  空标签文件: {total_empty}")
     print(f"  图片-标签配对: {'全部通过 ✅' if all_paired else '有孤立文件 ⚠'}")
