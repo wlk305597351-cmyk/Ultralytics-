@@ -207,7 +207,9 @@ class LossMatrixPlanTest(unittest.TestCase):
         self.assertTrue(torch.isfinite(preds["scores"].grad).all())
 
 
-@unittest.skipUnless(os.getenv("RUN_LOSS_TRAIN_SMOKE") == "1", "Set RUN_LOSS_TRAIN_SMOKE=1 to enable training smoke tests")
+@unittest.skipUnless(
+    os.getenv("RUN_LOSS_TRAIN_SMOKE") == "1", "Set RUN_LOSS_TRAIN_SMOKE=1 to enable training smoke tests"
+)
 class LossTrainSmokeTest(unittest.TestCase):
     """Optional micro training smoke tests for end-to-end loss wiring."""
 
@@ -225,13 +227,7 @@ class LossTrainSmokeTest(unittest.TestCase):
                 lbl_path = root / "labels" / split / f"{i}.txt"
                 cv2.imwrite(str(img_path), img)
                 lbl_path.write_text("0 0.5 0.5 0.5 0.5\n", encoding="utf-8")
-        yaml_text = (
-            f"path: {root}\n"
-            "train: images/train\n"
-            "val: images/val\n"
-            "names:\n"
-            "  0: obj\n"
-        )
+        yaml_text = f"path: {root}\ntrain: images/train\nval: images/val\nnames:\n  0: obj\n"
         yaml_path = root / "tiny.yaml"
         yaml_path.write_text(yaml_text, encoding="utf-8")
         return yaml_path
