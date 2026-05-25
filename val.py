@@ -1,27 +1,43 @@
-import warnings, os, sys, argparse, csv
+import argparse
+import csv
+import os
+import sys
+import warnings
 from pathlib import Path
 
 # 默认使用第 0 张显卡，运行时可通过 --device 覆盖
-os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 # os.environ["CUDA_VISIBLE_DEVICES"] = '2' # 指定使用第三张显卡
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 import numpy as np
 from prettytable import PrettyTable
+
 from ultralytics import YOLO
-from ultralytics.utils.torch_utils import model_info
 from ultralytics.utils import LOGGER
+from ultralytics.utils.torch_utils import model_info
 
 # BILIBILI UP 魔傀面具
 # 验证参数官方详解链接：https://docs.ultralytics.com/modes/val/#usage-examples:~:text=of%20each%20category-,Arguments%20for%20YOLO%20Model%20Validation,-When%20validating%20YOLO
 
 # 最终论文的参数量和计算量统一以这个脚本运行出来的为准
 
-RED, GREEN, BLUE, YELLOW, ORANGE, CYAN, MAGENTA, BOLD, RESET = "\033[91m", "\033[92m", "\033[94m", "\033[93m", "\033[38;5;208m", "\033[96m", "\033[95m", "\033[1m", "\033[0m"
+RED, GREEN, BLUE, YELLOW, ORANGE, CYAN, MAGENTA, BOLD, RESET = (
+    "\033[91m",
+    "\033[92m",
+    "\033[94m",
+    "\033[93m",
+    "\033[38;5;208m",
+    "\033[96m",
+    "\033[95m",
+    "\033[1m",
+    "\033[0m",
+)
+
 
 def get_weight_size(path):
     stats = os.stat(path)
-    return f'{stats.st_size / 1024 / 1024:.1f}'
+    return f"{stats.st_size / 1024 / 1024:.1f}"
 
 
 def fmt_metric(v):
@@ -39,7 +55,7 @@ def _color_text(text, color=GREEN, bold=False):
 
 
 def print_highlight_table(table, header_color_value_cols=None, color_first_col=True):
-    """高亮打印 PrettyTable，终端可读性更好。"""
+    """高亮打印 PrettyTable，终端可读性更好。."""
     header_color_value_cols = set(header_color_value_cols or [])
     highlighted = PrettyTable()
     highlighted.title = _color_text(table.title, CYAN, bold=True) if table.title else table.title
@@ -65,13 +81,13 @@ def print_highlight_table(table, header_color_value_cols=None, color_first_col=T
 
 
 def _update_registry(name, mAP50, mAP50_95):
-    """更新 registry.csv 中对应实验的评估指标。"""
-    registry_path = Path(__file__).parent / 'experiments' / 'registry.csv'
+    """更新 registry.csv 中对应实验的评估指标。."""
+    registry_path = Path(__file__).parent / "experiments" / "registry.csv"
     if not registry_path.exists():
         return
 
     rows = []
-    with open(registry_path, 'r', newline='') as f:
+    with open(registry_path, newline="") as f:
         reader = csv.DictReader(f)
         fieldnames = reader.fieldnames
         rows = list(reader)
@@ -79,38 +95,31 @@ def _update_registry(name, mAP50, mAP50_95):
     # 找到最近一条 name 匹配且 status=started 的行，更新为 evaluated
     updated = False
     for row in reversed(rows):
-        if row.get('exp_name') == name and row.get('status') == 'started':
-            row['best_mAP50'] = f'{mAP50:.4f}'
-            row['best_mAP50_95'] = f'{mAP50_95:.4f}'
-            row['status'] = 'evaluated'
+        if row.get("exp_name") == name and row.get("status") == "started":
+            row["best_mAP50"] = f"{mAP50:.4f}"
+            row["best_mAP50_95"] = f"{mAP50_95:.4f}"
+            row["status"] = "evaluated"
             updated = True
             break
 
     if updated:
-        with open(registry_path, 'w', newline='') as f:
+        with open(registry_path, "w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(rows)
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='YOLO Snow 评估')
-    parser.add_argument('--model', type=str,
-                        default='/home/wanglinkai/projects/Ultralytics_305597351/yolov8m.pt',
-                        help='权重路径')
-    parser.add_argument('--data', type=str, default='dataset/data.yaml',
-                        help='数据集配置文件')
-    parser.add_argument('--device', type=str, default='0',
-                        help='GPU ID')
-    parser.add_argument('--batch', type=int, default=16,
-                        help='批次大小')
-    parser.add_argument('--imgsz', type=int, default=640,
-                        help='图像尺寸')
-    parser.add_argument('--split', type=str, default='test',
-                        choices=['train', 'val', 'test'],
-                        help='评估 split')
-    parser.add_argument('--name', type=str, default='yolov8m',
-                        help='实验名（用于回写 registry）')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="YOLO Snow 评估")
+    parser.add_argument(
+        "--model", type=str, default="/home/wanglinkai/projects/Ultralytics_305597351/yolov8m.pt", help="权重路径"
+    )
+    parser.add_argument("--data", type=str, default="dataset/data.yaml", help="数据集配置文件")
+    parser.add_argument("--device", type=str, default="0", help="GPU ID")
+    parser.add_argument("--batch", type=int, default=16, help="批次大小")
+    parser.add_argument("--imgsz", type=int, default=640, help="图像尺寸")
+    parser.add_argument("--split", type=str, default="test", choices=["train", "val", "test"], help="评估 split")
+    parser.add_argument("--name", type=str, default="yolov8m", help="实验名（用于回写 registry）")
 
     args = parser.parse_args()
 
@@ -123,130 +132,194 @@ if __name__ == '__main__':
     imgsz = args.imgsz
 
     model = YOLO(model_path)
-    result = model.val(data=args.data,
-                        split=args.split,
-                        imgsz=args.imgsz,
-                        batch=args.batch,
-                        rect=False,
-                        auto_coco_eval=True,
-                        project='val',
-                        name=args.name,
-                        device='0',
-                        )
-    
+    result = model.val(
+        data=args.data,
+        split=args.split,
+        imgsz=args.imgsz,
+        batch=args.batch,
+        rect=False,
+        auto_coco_eval=True,
+        project="val",
+        name=args.name,
+        device="0",
+    )
+
     length = result.box.p.size
     model_names = list(result.names.values())
-    preprocess_time_per_image = result.speed['preprocess']
-    inference_time_per_image = result.speed['inference']
-    postprocess_time_per_image = result.speed['postprocess']
+    preprocess_time_per_image = result.speed["preprocess"]
+    inference_time_per_image = result.speed["inference"]
+    postprocess_time_per_image = result.speed["postprocess"]
     all_time_per_image = preprocess_time_per_image + inference_time_per_image + postprocess_time_per_image
-    
+
     n_l, n_p, n_g, flops = model_info(model.model, imgsz=imgsz)
 
     model_info_table = PrettyTable()
     model_info_table.title = "Model Info"
-    model_info_table.field_names = ["GFLOPs", "Parameters", "前处理时间/一张图", "推理时间/一张图", "后处理时间/一张图", "FPS(前处理+模型推理+后处理)", "FPS(推理)", "Model File Size"]
-    model_info_table.add_row([f'{flops:.1f}', f'{n_p:,}', 
-                                f'{preprocess_time_per_image / 1000:.6f}s', f'{inference_time_per_image / 1000:.6f}s', 
-                                f'{postprocess_time_per_image / 1000:.6f}s', f'{1000 / all_time_per_image:.2f}', 
-                                f'{1000 / inference_time_per_image:.2f}', f'{get_weight_size(model_path)}MB'])
+    model_info_table.field_names = [
+        "GFLOPs",
+        "Parameters",
+        "前处理时间/一张图",
+        "推理时间/一张图",
+        "后处理时间/一张图",
+        "FPS(前处理+模型推理+后处理)",
+        "FPS(推理)",
+        "Model File Size",
+    ]
+    model_info_table.add_row(
+        [
+            f"{flops:.1f}",
+            f"{n_p:,}",
+            f"{preprocess_time_per_image / 1000:.6f}s",
+            f"{inference_time_per_image / 1000:.6f}s",
+            f"{postprocess_time_per_image / 1000:.6f}s",
+            f"{1000 / all_time_per_image:.2f}",
+            f"{1000 / inference_time_per_image:.2f}",
+            f"{get_weight_size(model_path)}MB",
+        ]
+    )
 
     for _ in range(5):
-        LOGGER.info(f'{BOLD}{ORANGE}{"-"*20}论文上的数据以以下结果为准{"-"*20}{RESET}')
-    
+        LOGGER.info(f"{BOLD}{ORANGE}{'-' * 20}论文上的数据以以下结果为准{'-' * 20}{RESET}")
+
     print_highlight_table(model_info_table, color_first_col=False)
 
     yolo_metrics_table = PrettyTable()
     yolo_metrics_table.title = "YOLO Metrics"
-    if model.task == 'detect' or model.task == 'obb':
-        yolo_metrics_table.field_names = ["Class Name", "Box (Precision", "Recall", "F1-Score", "mAP50", "mAP75", "mAP50-95)"]
+    if model.task == "detect" or model.task == "obb":
+        yolo_metrics_table.field_names = [
+            "Class Name",
+            "Box (Precision",
+            "Recall",
+            "F1-Score",
+            "mAP50",
+            "mAP75",
+            "mAP50-95)",
+        ]
         for idx in range(length):
-            yolo_metrics_table.add_row([
-                                        model_names[idx], 
-                                        f"{result.box.p[idx]:.4f}", 
-                                        f"{result.box.r[idx]:.4f}", 
-                                        f"{result.box.f1[idx]:.4f}", 
-                                        f"{result.box.ap50[idx]:.4f}", 
-                                        f"{result.box.all_ap[idx, 5]:.4f}", # 50 55 60 65 70 75 80 85 90 95 
-                                        f"{result.box.ap[idx]:.4f}"
-                                    ])
-        yolo_metrics_table.add_row([
-                                    "all(平均数据)", 
-                                    f"{result.results_dict['metrics/precision(B)']:.4f}", 
-                                    f"{result.results_dict['metrics/recall(B)']:.4f}", 
-                                    f"{np.mean(result.box.f1[:length]):.4f}", 
-                                    f"{result.results_dict['metrics/mAP50(B)']:.4f}", 
-                                    f"{np.mean(result.box.all_ap[:length, 5]):.4f}", # 50 55 60 65 70 75 80 85 90 95 
-                                    f"{result.results_dict['metrics/mAP50-95(B)']:.4f}"
-                                ])
-    elif model.task == 'segment':
-        yolo_metrics_table.field_names = ["Class Name", "Precision(Box)", "Recall(Box)", "F1-Score(Box)", "mAP50(Box)", "mAP75(Box)", "mAP50-95(Box)", 
-                                           "Precision(Seg)", "Recall(Seg)", "F1-Score(Seg)", "mAP50(Seg)", "mAP75(Seg)", "mAP50-95(Seg)"]
+            yolo_metrics_table.add_row(
+                [
+                    model_names[idx],
+                    f"{result.box.p[idx]:.4f}",
+                    f"{result.box.r[idx]:.4f}",
+                    f"{result.box.f1[idx]:.4f}",
+                    f"{result.box.ap50[idx]:.4f}",
+                    f"{result.box.all_ap[idx, 5]:.4f}",  # 50 55 60 65 70 75 80 85 90 95
+                    f"{result.box.ap[idx]:.4f}",
+                ]
+            )
+        yolo_metrics_table.add_row(
+            [
+                "all(平均数据)",
+                f"{result.results_dict['metrics/precision(B)']:.4f}",
+                f"{result.results_dict['metrics/recall(B)']:.4f}",
+                f"{np.mean(result.box.f1[:length]):.4f}",
+                f"{result.results_dict['metrics/mAP50(B)']:.4f}",
+                f"{np.mean(result.box.all_ap[:length, 5]):.4f}",  # 50 55 60 65 70 75 80 85 90 95
+                f"{result.results_dict['metrics/mAP50-95(B)']:.4f}",
+            ]
+        )
+    elif model.task == "segment":
+        yolo_metrics_table.field_names = [
+            "Class Name",
+            "Precision(Box)",
+            "Recall(Box)",
+            "F1-Score(Box)",
+            "mAP50(Box)",
+            "mAP75(Box)",
+            "mAP50-95(Box)",
+            "Precision(Seg)",
+            "Recall(Seg)",
+            "F1-Score(Seg)",
+            "mAP50(Seg)",
+            "mAP75(Seg)",
+            "mAP50-95(Seg)",
+        ]
         for idx in range(length):
-            yolo_metrics_table.add_row([
-                                        model_names[idx], 
-                                        f"{result.box.p[idx]:.4f}", 
-                                        f"{result.box.r[idx]:.4f}", 
-                                        f"{result.box.f1[idx]:.4f}", 
-                                        f"{result.box.ap50[idx]:.4f}", 
-                                        f"{result.box.all_ap[idx, 5]:.4f}", # 50 55 60 65 70 75 80 85 90 95 
-                                        f"{result.box.ap[idx]:.4f}",
-                                        f"{result.seg.p[idx]:.4f}", 
-                                        f"{result.seg.r[idx]:.4f}", 
-                                        f"{result.seg.f1[idx]:.4f}", 
-                                        f"{result.seg.ap50[idx]:.4f}", 
-                                        f"{result.seg.all_ap[idx, 5]:.4f}", # 50 55 60 65 70 75 80 85 90 95 
-                                        f"{result.seg.ap[idx]:.4f}"
-                                    ])
-        yolo_metrics_table.add_row([
-                                    "all(平均数据)", 
-                                    f"{result.results_dict['metrics/precision(B)']:.4f}", 
-                                    f"{result.results_dict['metrics/recall(B)']:.4f}", 
-                                    f"{np.mean(result.box.f1[:length]):.4f}", 
-                                    f"{result.results_dict['metrics/mAP50(B)']:.4f}", 
-                                    f"{np.mean(result.box.all_ap[:length, 5]):.4f}", # 50 55 60 65 70 75 80 85 90 95 
-                                    f"{result.results_dict['metrics/mAP50-95(B)']:.4f}",
-                                    f"{result.results_dict['metrics/precision(M)']:.4f}", 
-                                    f"{result.results_dict['metrics/recall(M)']:.4f}", 
-                                    f"{np.mean(result.box.f1[:length]):.4f}", 
-                                    f"{result.results_dict['metrics/mAP50(M)']:.4f}", 
-                                    f"{np.mean(result.box.all_ap[:length, 5]):.4f}", # 50 55 60 65 70 75 80 85 90 95 
-                                    f"{result.results_dict['metrics/mAP50-95(M)']:.4f}"
-                                ])
-    elif model.task == 'pose':
-        yolo_metrics_table.field_names = ["Class Name", "Precision(Box)", "Recall(Box)", "F1-Score(Box)", "mAP50(Box)", "mAP75(Box)", "mAP50-95(Box)", 
-                                           "Precision(Pose)", "Recall(Pose)", "F1-Score(Pose)", "mAP50(Pose)", "mAP75(Pose)", "mAP50-95(Pose)"]
+            yolo_metrics_table.add_row(
+                [
+                    model_names[idx],
+                    f"{result.box.p[idx]:.4f}",
+                    f"{result.box.r[idx]:.4f}",
+                    f"{result.box.f1[idx]:.4f}",
+                    f"{result.box.ap50[idx]:.4f}",
+                    f"{result.box.all_ap[idx, 5]:.4f}",  # 50 55 60 65 70 75 80 85 90 95
+                    f"{result.box.ap[idx]:.4f}",
+                    f"{result.seg.p[idx]:.4f}",
+                    f"{result.seg.r[idx]:.4f}",
+                    f"{result.seg.f1[idx]:.4f}",
+                    f"{result.seg.ap50[idx]:.4f}",
+                    f"{result.seg.all_ap[idx, 5]:.4f}",  # 50 55 60 65 70 75 80 85 90 95
+                    f"{result.seg.ap[idx]:.4f}",
+                ]
+            )
+        yolo_metrics_table.add_row(
+            [
+                "all(平均数据)",
+                f"{result.results_dict['metrics/precision(B)']:.4f}",
+                f"{result.results_dict['metrics/recall(B)']:.4f}",
+                f"{np.mean(result.box.f1[:length]):.4f}",
+                f"{result.results_dict['metrics/mAP50(B)']:.4f}",
+                f"{np.mean(result.box.all_ap[:length, 5]):.4f}",  # 50 55 60 65 70 75 80 85 90 95
+                f"{result.results_dict['metrics/mAP50-95(B)']:.4f}",
+                f"{result.results_dict['metrics/precision(M)']:.4f}",
+                f"{result.results_dict['metrics/recall(M)']:.4f}",
+                f"{np.mean(result.box.f1[:length]):.4f}",
+                f"{result.results_dict['metrics/mAP50(M)']:.4f}",
+                f"{np.mean(result.box.all_ap[:length, 5]):.4f}",  # 50 55 60 65 70 75 80 85 90 95
+                f"{result.results_dict['metrics/mAP50-95(M)']:.4f}",
+            ]
+        )
+    elif model.task == "pose":
+        yolo_metrics_table.field_names = [
+            "Class Name",
+            "Precision(Box)",
+            "Recall(Box)",
+            "F1-Score(Box)",
+            "mAP50(Box)",
+            "mAP75(Box)",
+            "mAP50-95(Box)",
+            "Precision(Pose)",
+            "Recall(Pose)",
+            "F1-Score(Pose)",
+            "mAP50(Pose)",
+            "mAP75(Pose)",
+            "mAP50-95(Pose)",
+        ]
         for idx in range(length):
-            yolo_metrics_table.add_row([
-                                        model_names[idx], 
-                                        f"{result.box.p[idx]:.4f}", 
-                                        f"{result.box.r[idx]:.4f}", 
-                                        f"{result.box.f1[idx]:.4f}", 
-                                        f"{result.box.ap50[idx]:.4f}", 
-                                        f"{result.box.all_ap[idx, 5]:.4f}", # 50 55 60 65 70 75 80 85 90 95 
-                                        f"{result.box.ap[idx]:.4f}",
-                                        f"{result.pose.p[idx]:.4f}", 
-                                        f"{result.pose.r[idx]:.4f}", 
-                                        f"{result.pose.f1[idx]:.4f}", 
-                                        f"{result.pose.ap50[idx]:.4f}", 
-                                        f"{result.pose.all_ap[idx, 5]:.4f}", # 50 55 60 65 70 75 80 85 90 95 
-                                        f"{result.pose.ap[idx]:.4f}"
-                                    ])
-        yolo_metrics_table.add_row([
-                                    "all(平均数据)", 
-                                    f"{result.results_dict['metrics/precision(B)']:.4f}", 
-                                    f"{result.results_dict['metrics/recall(B)']:.4f}", 
-                                    f"{np.mean(result.box.f1[:length]):.4f}", 
-                                    f"{result.results_dict['metrics/mAP50(B)']:.4f}", 
-                                    f"{np.mean(result.box.all_ap[:length, 5]):.4f}", # 50 55 60 65 70 75 80 85 90 95 
-                                    f"{result.results_dict['metrics/mAP50-95(B)']:.4f}",
-                                    f"{result.results_dict['metrics/precision(P)']:.4f}", 
-                                    f"{result.results_dict['metrics/recall(P)']:.4f}", 
-                                    f"{np.mean(result.box.f1[:length]):.4f}", 
-                                    f"{result.results_dict['metrics/mAP50(P)']:.4f}", 
-                                    f"{np.mean(result.box.all_ap[:length, 5]):.4f}", # 50 55 60 65 70 75 80 85 90 95 
-                                    f"{result.results_dict['metrics/mAP50-95(P)']:.4f}"
-                                ])
+            yolo_metrics_table.add_row(
+                [
+                    model_names[idx],
+                    f"{result.box.p[idx]:.4f}",
+                    f"{result.box.r[idx]:.4f}",
+                    f"{result.box.f1[idx]:.4f}",
+                    f"{result.box.ap50[idx]:.4f}",
+                    f"{result.box.all_ap[idx, 5]:.4f}",  # 50 55 60 65 70 75 80 85 90 95
+                    f"{result.box.ap[idx]:.4f}",
+                    f"{result.pose.p[idx]:.4f}",
+                    f"{result.pose.r[idx]:.4f}",
+                    f"{result.pose.f1[idx]:.4f}",
+                    f"{result.pose.ap50[idx]:.4f}",
+                    f"{result.pose.all_ap[idx, 5]:.4f}",  # 50 55 60 65 70 75 80 85 90 95
+                    f"{result.pose.ap[idx]:.4f}",
+                ]
+            )
+        yolo_metrics_table.add_row(
+            [
+                "all(平均数据)",
+                f"{result.results_dict['metrics/precision(B)']:.4f}",
+                f"{result.results_dict['metrics/recall(B)']:.4f}",
+                f"{np.mean(result.box.f1[:length]):.4f}",
+                f"{result.results_dict['metrics/mAP50(B)']:.4f}",
+                f"{np.mean(result.box.all_ap[:length, 5]):.4f}",  # 50 55 60 65 70 75 80 85 90 95
+                f"{result.results_dict['metrics/mAP50-95(B)']:.4f}",
+                f"{result.results_dict['metrics/precision(P)']:.4f}",
+                f"{result.results_dict['metrics/recall(P)']:.4f}",
+                f"{np.mean(result.box.f1[:length]):.4f}",
+                f"{result.results_dict['metrics/mAP50(P)']:.4f}",
+                f"{np.mean(result.box.all_ap[:length, 5]):.4f}",  # 50 55 60 65 70 75 80 85 90 95
+                f"{result.results_dict['metrics/mAP50-95(P)']:.4f}",
+            ]
+        )
 
     print_highlight_table(yolo_metrics_table)
 
@@ -407,21 +480,21 @@ if __name__ == '__main__':
         else:
             LOGGER.warning("当前任务未返回 COCO per-class 指标，跳过 COCO 表格输出。")
 
-    with open(result.save_dir / 'paper_data.txt', 'w+', errors="ignore", encoding="utf-8") as f:
+    with open(result.save_dir / "paper_data.txt", "w+", errors="ignore", encoding="utf-8") as f:
         f.write(str(model_info_table))
-        f.write('\n')
+        f.write("\n")
         f.write(str(yolo_metrics_table))
         if coco_metrics_table is not None:
-            f.write('\n')
+            f.write("\n")
             f.write(str(coco_metrics_table))
-    
+
     for _ in range(5):
-        LOGGER.info(f'{BOLD}{ORANGE}{"-"*20}结果已保存至 {result.save_dir}/paper_data.txt...{"-"*20}{RESET}')
+        LOGGER.info(f"{BOLD}{ORANGE}{'-' * 20}结果已保存至 {result.save_dir}/paper_data.txt...{'-' * 20}{RESET}")
 
     # --- registry 回写 ---
     try:
-        mAP50 = result.results_dict.get('metrics/mAP50(B)', None)
-        mAP50_95 = result.results_dict.get('metrics/mAP50-95(B)', None)
+        mAP50 = result.results_dict.get("metrics/mAP50(B)", None)
+        mAP50_95 = result.results_dict.get("metrics/mAP50-95(B)", None)
         if mAP50 is not None and mAP50_95 is not None:
             _update_registry(args.name, mAP50, mAP50_95)
     except Exception:
