@@ -46,6 +46,7 @@ tail -30 logs/{name}.log
 ```
 
 Determine cause:
+
 - Log ends with "X epochs completed" → training completed normally. Update registry: `status=completed`.
 - Log ends with error/traceback → crash. Update registry: `status=crashed`. Report crash details.
 - Log is empty or very short → process died immediately. Report the last few lines.
@@ -59,9 +60,9 @@ Read `experiments/registry.csv`, find the row with `exp_name={name}` and `status
 Find and read results.csv. Note: ultralytics nests output under `runs/detect/train/{name}/` when project is `train`:
 
 ```bash
-find runs/ -path "*/train/{name}/results.csv" 2>/dev/null | head -1
+find runs/ -path "*/train/{name}/results.csv" 2> /dev/null | head -1
 # or try the direct path
-ls runs/detect/train/{name}/results.csv 2>/dev/null
+ls runs/detect/train/{name}/results.csv 2> /dev/null
 ```
 
 Read the last line of results.csv to get current metrics:
@@ -71,6 +72,7 @@ tail -1 {results_csv_path}
 ```
 
 Parse the CSV header and last row to extract:
+
 - `epoch`: current epoch
 - `train/box_loss`, `train/cls_loss`, `train/dfl_loss`: training losses
 - `metrics/mAP50(B)`, `metrics/mAP50-95(B)`: validation mAP (may be empty for early epochs)
@@ -81,6 +83,7 @@ Parse the CSV header and last row to extract:
 Count total epochs from registry (`experiments/registry.csv` → `epochs` column for this experiment).
 
 Calculate average time per epoch from results.csv:
+
 - Read results.csv, parse the `time` column (cumulative seconds)
 - `avg_sec_per_epoch = last_time / current_epoch`
 - `remaining = avg_sec_per_epoch × (total_epochs - current_epoch)`
