@@ -11,17 +11,17 @@ model: opus
 
 将 $ARGUMENTS 映射为 trainer agent 的参数确认阶段：
 
-| 用户写法 | 映射 |
-|---------|------|
-| `yolov8n` / `yolov8s` / `yolov8m` / `yolov8l` / `yolov8x` | `--model {name}.pt` |
-| `--epochs N` | 训练轮数 |
-| `--batch N` | 批次大小 |
-| `--module EMA` / `CBAM` / `SE` 等 | 注入模块（trainer 会搜索 improve/ 下列出变体） |
-| `--device N` | 指定 GPU（跳过 trainer 的 GPU 检测阶段） |
-| `--imgsz N` | 图像尺寸 |
-| `--cos-lr` | 启用余弦退火 |
-| `--no-amp` | 关闭混合精度 |
-| `--name X` | 实验名 |
+| 用户写法                                                  | 映射                                           |
+| --------------------------------------------------------- | ---------------------------------------------- |
+| `yolov8n` / `yolov8s` / `yolov8m` / `yolov8l` / `yolov8x` | `--model {name}.pt`                            |
+| `--epochs N`                                              | 训练轮数                                       |
+| `--batch N`                                               | 批次大小                                       |
+| `--module EMA` / `CBAM` / `SE` 等                         | 注入模块（trainer 会搜索 improve/ 下列出变体） |
+| `--device N`                                              | 指定 GPU（跳过 trainer 的 GPU 检测阶段）       |
+| `--imgsz N`                                               | 图像尺寸                                       |
+| `--cos-lr`                                                | 启用余弦退火                                   |
+| `--no-amp`                                                | 关闭混合精度                                   |
+| `--name X`                                                | 实验名                                         |
 
 未指定的参数使用 trainer agent 的默认值。
 
