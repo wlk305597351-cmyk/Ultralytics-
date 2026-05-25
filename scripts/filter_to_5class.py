@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""筛选 COCO 80 类标签到 5 类并重映射 class_id。
+"""筛选 COCO 80 类标签到 5 类并重映射 class_id。.
 
 映射规则 (COCO id → 新 id):
   0 (person) → 0
@@ -35,7 +35,7 @@ def process_split(split_name):
 
     for fname in files:
         fpath = os.path.join(split_dir, fname)
-        with open(fpath, "r") as f:
+        with open(fpath) as f:
             lines = f.readlines()
 
         kept_lines = []
@@ -91,12 +91,12 @@ def main():
             grand_discarded += d
             grand_empty += e
 
-    print(f"\n=== 总计 ===")
+    print("\n=== 总计 ===")
     print(f"  处理文件: {grand_files}")
     print(f"  保留 box: {grand_kept}")
     print(f"  丢弃 box: {grand_discarded}")
     print(f"  变空文件: {grand_empty}")
-    print(f"\n=== 完成 ===")
+    print("\n=== 完成 ===")
 
 
 if __name__ == "__main__":

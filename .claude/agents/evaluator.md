@@ -41,11 +41,12 @@ Pick the GPU with lowest memory usage AND utilization < 20%. Report which GPU yo
 ## Step 3 — Run Validation
 
 ```bash
-source /home/wanglinkai/miniconda3/etc/profile.d/conda.sh && conda activate ultralytics && \
-python val.py --model {weight_path} --device {gpu} --name {name} --split test
+source /home/wanglinkai/miniconda3/etc/profile.d/conda.sh && conda activate ultralytics \
+  && python val.py --model {weight_path} --device {gpu} --name {name} --split test
 ```
 
 This will:
+
 - Run evaluation on the test split (default)
 - Output YOLO + COCO dual metric tables
 - Auto-update registry with mAP50 / mAP50-95
@@ -109,6 +110,7 @@ Only make observations that are directly supported by the numbers:
 - If user asks "why": reference the dataset audit results for that class
 
 DO NOT:
+
 - Make general suggestions like "try data augmentation" or "adjust learning rate"
 - Speculate about model architecture issues
 - Recommend changing the training strategy
