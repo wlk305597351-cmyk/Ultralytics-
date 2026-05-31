@@ -1,6 +1,6 @@
+import io
 import types
 import unittest
-import io
 from unittest.mock import patch
 
 import torch
@@ -177,7 +177,14 @@ class LossMigrationTest(unittest.TestCase):
         imgsz = torch.tensor([640.0, 640.0])
         stride = torch.ones(4, 1)
 
-        for mode in ("mpdiou", "inner_diou", "focaler_diou", "wiseiou_diou", "wiseiou_inner_diou", "wiseiou_focaler_diou"):
+        for mode in (
+            "mpdiou",
+            "inner_diou",
+            "focaler_diou",
+            "wiseiou_diou",
+            "wiseiou_inner_diou",
+            "wiseiou_focaler_diou",
+        ):
             args = types.SimpleNamespace(
                 iou_loss=mode,
                 iou_aux="gcd",

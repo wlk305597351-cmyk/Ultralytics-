@@ -3,7 +3,7 @@
 import pytest
 import torch
 
-from ultralytics.nn.extra_modules import EdgeLAWDS, FreqLAWDS, RouterLAWDS, Faster_CGA_Block
+from ultralytics.nn.extra_modules import EdgeLAWDS, Faster_CGA_Block, FreqLAWDS, RouterLAWDS
 from ultralytics.nn.tasks import parse_model
 
 
