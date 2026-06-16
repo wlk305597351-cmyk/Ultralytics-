@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import types
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -9,7 +10,6 @@ import numpy as np
 import pytest
 import torch
 from PIL import Image
-import types
 
 from ultralytics.models.yolo.detect import DetectionValidator
 from ultralytics.utils.coco_auto import (
