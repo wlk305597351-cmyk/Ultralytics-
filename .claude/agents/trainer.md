@@ -46,6 +46,7 @@ nvidia-smi --query-compute-apps=pid,used_memory,gpu_uuid --format=csv,noheader
 ```
 
 **3D idle criteria** (ALL must be true):
+
 1. `memory.used / memory.total < 20%`
 2. `utilization.gpu < 20%`
 3. No foreign training processes (compute apps list shows no other PIDs consuming VRAM)
@@ -90,6 +91,7 @@ Ask ALL parameters in ONE message. Provide defaults for everything:
 **Module injection handling:**
 
 If user specifies a module (e.g., "加 EMA", "用 CBAM"):
+
 1. Search: `find ultralytics/cfg/models/improve/ -type f -name "*{module}*" | sort`
 2. List all matching YAMLs with their parent directory (the directory name = injection category)
 3. Explain: "yolov8-EMA-1.yaml 和 yolov8-EMA-2.yaml 的区别通常是 EMA 模块插入 backbone 的不同位置。变体编号越大通常插入位置越靠后。"
@@ -97,6 +99,7 @@ If user specifies a module (e.g., "加 EMA", "用 CBAM"):
 5. Set `--cfg` to the chosen YAML path
 
 Popular module types and their directories:
+
 - attention: EMA, CBAM, SE, ECA, SimAM, GAM, CA, SA, ShuffleAttention, etc.
 - conv: DCNv2, GhostConv, DySnakeConv, etc.
 - head: various detection head modifications
@@ -118,10 +121,10 @@ If data-inspector agent is unavailable (file not found): explicitly tell user "�
 Run exactly 2 epochs with a `smoke_` prefix:
 
 ```bash
-source /home/wanglinkai/miniconda3/etc/profile.d/conda.sh && conda activate ultralytics && \
-python train.py --model {weight} --cfg {cfg} --device {gpu} --epochs 2 \
-  --batch {batch} --imgsz {imgsz} --name smoke_{name} --project smoke \
-  {additional args}
+source /home/wanglinkai/miniconda3/etc/profile.d/conda.sh && conda activate ultralytics \
+  && python train.py --model {weight} --cfg {cfg} --device {gpu} --epochs 2 \
+    --batch {batch} --imgsz {imgsz} --name smoke_{name} --project smoke \
+    {additional args}
 ```
 
 Wait for completion, then verify ALL of these pass:
@@ -134,12 +137,12 @@ Wait for completion, then verify ALL of these pass:
 
 **FAIL handling:**
 
-| Failure | Action |
-|---------|--------|
-| OOM | Reduce batch by half, retry (max 2 times: 16→8→4). Append `_retry{N}` to experiment name in registry |
-| NaN/Inf | Stop. Tell user: "检测到 NaN/Inf。建议：1) 加 --no-amp 关闭混合精度 2) 降学习率 3) 检查数据集标签" |
-| box_loss spike > 50% | Warn user, show both loss values, ask if continue |
-| Other error | Show last 30 lines of stderr, stop |
+| Failure              | Action                                                                                               |
+| -------------------- | ---------------------------------------------------------------------------------------------------- |
+| OOM                  | Reduce batch by half, retry (max 2 times: 16→8→4). Append `_retry{N}` to experiment name in registry |
+| NaN/Inf              | Stop. Tell user: "检测到 NaN/Inf。建议：1) 加 --no-amp 关闭混合精度 2) 降学习率 3) 检查数据集标签"   |
+| box_loss spike > 50% | Warn user, show both loss values, ask if continue                                                    |
+| Other error          | Show last 30 lines of stderr, stop                                                                   |
 
 **On smoke PASS:** Tell user the key metrics:
 

@@ -14,9 +14,7 @@ def _load_yaml(path: Path) -> dict:
 
 def test_parse_model_supports_nested_module_param_dict():
     """Regression: nested {'module': ..., 'param': ...} values should resolve to callables."""
-    yaml_path = (
-        Path(__file__).resolve().parents[1] / "ultralytics/cfg/models/improve/conv/yolo26-c3k2-conv.yaml"
-    )
+    yaml_path = Path(__file__).resolve().parents[1] / "ultralytics/cfg/models/improve/conv/yolo26-c3k2-conv.yaml"
     model, save = parse_model(_load_yaml(yaml_path), ch=3, verbose=False)
     assert len(model) > 0
     assert isinstance(save, list)
